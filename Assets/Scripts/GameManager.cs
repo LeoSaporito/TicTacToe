@@ -1,48 +1,49 @@
-using System;
+using System.Security.Cryptography;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.Rendering;
 
 public class GameManager : MonoBehaviour
-{
-    //GameManager will contain the board positions
-    //Spawns the pieces on each click
-    //Record which spot on the grid has a piece and which spot is empty
+{    
+    [SerializeField] GameObject openTilePrefab;
+    [SerializeField] float xIncrement;
+    [SerializeField] float yIncrement;
+    [SerializeField] float xStart;
+    [SerializeField] float yStart;
 
-    [SerializeField] GameObject playerPiece;
-
-    GameObject[,] positions = new GameObject[3, 3];
-
-    GameObject[] xPrefabs = new GameObject[5];
-    GameObject[] oPrefabs = new GameObject[4];
-
-    //string currentPlayer = "x";
-
-    void Start()
+    GameObject openTilesScript;
+    private void Start()
     {
-        //When the game starts, clear all positions on the board
-        for (int i = 0; i < positions.Length; i++)
-        {
-            positions[i, i] = null;
+        openTilesScript = GameObject.FindGameObjectWithTag("OpenTile");
+
+        //Spawn all the open tile prefabs in the grid
+
+        for (int i = 0; i < 3; i++)
+        { 
+            for (int j = 0; j < 3; j++)
+            {
+                //Increment the space between each prefab to fit into the grid
+                Instantiate(openTilePrefab, new Vector2(xIncrement * i - xStart, yIncrement * j - yStart), Quaternion.identity);
+            }
         }
     }
 
-    //Create the players piece when they click
     public void OnClick(InputValue value)
     {
         if (value.isPressed)
         {
-           Create();            
+            //Check the position of the mouse
+            //if the mouse position is in a open tile box collider
+            //spawn a piece and destroy the open tile prefab
+
+            Vector2 mousePosition = Camera.main.ScreenToWorldPoint(Mouse.current.position.ReadValue());
+
+            OpenTiles ot = openTilesScript.GetComponent<OpenTiles>();
+
+            if (ot.GetBoxCollider().bounds.Contains(mousePosition))
+            {
+                ot.DestroyThisTile();
+            }
         }
-    }
-
-    public GameObject Create()
-    {
-        //Get the position in the grid where the player clicked
-        //Spawn the piece in that position
-        
-        GameObject obj = Instantiate(playerPiece, new Vector2(0, 0), Quaternion.identity);
-        Pieces pieces = obj.GetComponent<Pieces>();
-
-        return obj;
     }
 }
