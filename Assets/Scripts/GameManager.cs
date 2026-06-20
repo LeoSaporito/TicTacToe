@@ -15,7 +15,7 @@ public class GameManager : MonoBehaviour
     GameObject[] xPrefabs = new GameObject[5];
     GameObject[] oPrefabs = new GameObject[4];
 
-    string currentPlayer = "x";
+    //string currentPlayer = "x";
 
     void Start()
     {
@@ -31,23 +31,18 @@ public class GameManager : MonoBehaviour
     {
         if (value.isPressed)
         {
-           Create("x");            
+           Create();            
         }
     }
 
-    public GameObject Create(string name)
+    public GameObject Create()
     {
         //Get the position in the grid where the player clicked
         //Spawn the piece in that position
         
-        GameObject obj = Instantiate(playerPiece, GetPositionInGrid(), Quaternion.identity);
+        GameObject obj = Instantiate(playerPiece, new Vector2(0, 0), Quaternion.identity);
         Pieces pieces = obj.GetComponent<Pieces>();
 
         return obj;
-    }
-
-    private Vector2 GetPositionInGrid()
-    {
-        
     }
 }
