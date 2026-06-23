@@ -1,7 +1,9 @@
 using System;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.SceneManagement;
 using static UnityEditor.Experimental.GraphView.GraphView;
+using TMPro;
 
 public class GameManager : MonoBehaviour
 {
@@ -14,6 +16,10 @@ public class GameManager : MonoBehaviour
     public string currentPlayer = "xPlayer";
 
     private bool gameOver;
+
+    public TextMeshProUGUI winnerText;
+    public TextMeshProUGUI restartText;
+
     private void Start()
     {
         gameOver = false;
@@ -24,10 +30,14 @@ public class GameManager : MonoBehaviour
             SpawnOpenTilePrefab(2, 0), SpawnOpenTilePrefab(2, 1), SpawnOpenTilePrefab(2, 2),
         };
 
-        for (int i = 0; i < openTiles.Length; i++)
-        {
-            SetPosition(openTiles[i]);
-        }
+        winnerText.enabled = false;
+
+        restartText.enabled = false;
+
+        //for (int i = 0; i < openTiles.Length; i++)
+        //{
+        //    SetPosition(openTiles[i]);
+        //}
     }
     private GameObject SpawnOpenTilePrefab(int x, int y)
     {
@@ -39,16 +49,21 @@ public class GameManager : MonoBehaviour
 
         return obj;
     }
-    public void SetPosition(GameObject obj)
-    {
-        OpenTiles ot = obj.GetComponent<OpenTiles>();
+    //public void SetPosition(GameObject obj)
+    //{
+    //    OpenTiles ot = obj.GetComponent<OpenTiles>();
 
-        positions[ot.GetXBoard(), ot.GetYBoard()] = obj;
-    }
+    //    positions[ot.GetXBoard(), ot.GetYBoard()] = obj;
+    //}
     public void OnClick(InputValue value)
     {
         if (value.isPressed)
         {
+            if (gameOver)
+            {
+                SceneManager.LoadScene("GameScene"); 
+            }
+
             Vector2 mousePosition = Camera.main.ScreenToWorldPoint(Mouse.current.position.ReadValue());
 
             RaycastHit2D hit = Physics2D.Raycast(mousePosition, Vector2.zero);
@@ -57,17 +72,30 @@ public class GameManager : MonoBehaviour
             {
                 GameObject clickedObject = hit.collider.gameObject;
 
+                OpenTiles ot = clickedObject.GetComponent<OpenTiles>();
+
+                GameObject newPiece;
+
                 if (currentPlayer == "xPlayer")
                 {
-                    CreatePiece("xPiece", clickedObject.transform.position);
+                    newPiece = CreatePiece("xPiece", clickedObject.transform.position);
                 }
-                else if (currentPlayer != "xPlayer")
+                else
                 {
-                    CreatePiece("oPiece", clickedObject.transform.position);                    
+                    newPiece = CreatePiece("oPiece", clickedObject.transform.position);                    
                 }
 
+                positions[ot.GetXBoard(), ot.GetYBoard()] = newPiece;
+
                 Destroy(clickedObject);
-                NextTurn();
+                if (Winner())
+                {
+                    print(currentPlayer + " Won");
+                }
+                else
+                {
+                    NextTurn();
+                }
             }
         }
     }
@@ -92,20 +120,70 @@ public class GameManager : MonoBehaviour
             currentPlayer = "xPlayer";
         }
     }
-    void Winner()
+    public bool Winner()
     {
-        if (positions[0, 2] && positions[1, 2] && positions[2, 2])
+        //HORIZONTAL WINS
+        if (IsPlayerAt(0, 0, currentPlayer) && IsPlayerAt(1, 0, currentPlayer) && IsPlayerAt(2, 0, currentPlayer))
         {
-            gameOver = true;
-            print("Game Over");
+            return true;
         }
-        else
+        if (IsPlayerAt(0, 1, currentPlayer) && IsPlayerAt(1, 1, currentPlayer) && IsPlayerAt(2, 1, currentPlayer))
         {
-            gameOver = false;
+            return true;
         }
+        if (IsPlayerAt(0, 2, currentPlayer) && IsPlayerAt(1, 2, currentPlayer) && IsPlayerAt(2, 2, currentPlayer))
+        {
+            return true;
+        }
+        //VERTICAL WINS
+        if (IsPlayerAt(0, 0, currentPlayer) && IsPlayerAt(0, 1, currentPlayer) && IsPlayerAt(0, 2, currentPlayer))
+        {
+            return true;
+        }
+        if (IsPlayerAt(1, 0, currentPlayer) && IsPlayerAt(1, 1, currentPlayer) && IsPlayerAt(1, 2, currentPlayer))
+        {
+            return true;
+        }
+        if (IsPlayerAt(2, 0, currentPlayer) && IsPlayerAt(2, 1, currentPlayer) && IsPlayerAt(2, 2, currentPlayer))
+        {
+            return true;
+        }
+        //DIAGONAL WINS
+        if (IsPlayerAt(0, 0, currentPlayer) && IsPlayerAt(1, 1, currentPlayer) && IsPlayerAt(2, 2, currentPlayer))
+        {
+            return true;
+        }
+        if (IsPlayerAt(0, 2, currentPlayer) && IsPlayerAt(1, 1, currentPlayer) && IsPlayerAt(2, 0, currentPlayer))
+        {
+            return true;
+        }
+
+        return false;
+    }
+    public bool IsPlayerAt(int x, int y, string player)
+    {
+        if (positions[x, y] == null)
+        {
+            return false;
+        }
+
+        if (positions[x, y].GetComponent<Pieces>().player == player)
+        {
+            return true;
+        }
+
+        return false;
     }
     private void Update()
     {
-        Winner();
+        if (Winner())
+        {
+            gameOver = true;
+
+            winnerText.enabled = true;
+            winnerText.text = currentPlayer + " won";
+
+            restartText.enabled = true;
+        }
     }
 }

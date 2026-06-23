@@ -5,13 +5,13 @@ using UnityEngine.WSA;
 public class Pieces : MonoBehaviour
 {
     public Sprite xs, os;
-    private string player;
+    public string player;
    public void Activate()
     {
         switch (this.name)
         {
-            case "xPiece": this.GetComponent<SpriteRenderer>().sprite = xs; break;
-            case "oPiece": this.GetComponent<SpriteRenderer>().sprite = os; break;
+            case "xPiece": this.GetComponent<SpriteRenderer>().sprite = xs; player = "xPlayer"; break;
+            case "oPiece": this.GetComponent<SpriteRenderer>().sprite = os; player = "oPlayer"; break;
         }
     }
     public GameObject GetPiece()
