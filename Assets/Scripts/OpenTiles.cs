@@ -1,21 +1,53 @@
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class OpenTiles : MonoBehaviour
 {
-    BoxCollider2D bc;
+    public int xBoard;
+    public int yBoard;
 
+    public float xOffset;
+    public float yOffset;
+    public float spacing;
+
+    Camera mainCamera;
+
+    private void Awake()
+    {
+        mainCamera = Camera.main;
+    }
     private void Start()
     {
-        bc = GetComponent<BoxCollider2D>();
+        SetCoords();        
     }
 
-    public BoxCollider2D GetBoxCollider()
+    public int GetXBoard()
     {
-        return bc;
+        return xBoard;
     }
-
-    public void DestroyThisTile()
+    public int GetYBoard()
     {
-        Destroy(gameObject);
+        return yBoard;
+    }
+    public void SetXBoard(int x)
+    {
+        xBoard = x;
+    }
+    public void SetYBoard(int y)
+    {
+        yBoard = y;
+    }
+    void SetCoords()
+    {
+        float x = xBoard;
+        float y = yBoard;
+
+        x *= xOffset;
+        y *= yOffset;
+
+        x += spacing;
+        y += spacing;
+
+        this.transform.position = new Vector2(x, y);
     }
 }

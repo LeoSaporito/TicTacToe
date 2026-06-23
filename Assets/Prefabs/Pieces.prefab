@@ -45,8 +45,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ed06df6cc1a512f4d8e762a94972437d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Pieces
-  x: {fileID: 3959922740387019359, guid: b60bad29eb1a2c24492f33998ace044a, type: 3}
-  o: {fileID: -1937887712669590171, guid: 88f3f3597662408439d445d10eee1ed3, type: 3}
+  xs: {fileID: 3959922740387019359, guid: b60bad29eb1a2c24492f33998ace044a, type: 3}
+  os: {fileID: -1937887712669590171, guid: 88f3f3597662408439d445d10eee1ed3, type: 3}
 --- !u!212 &3859829933569104039
 SpriteRenderer:
   serializedVersion: 2

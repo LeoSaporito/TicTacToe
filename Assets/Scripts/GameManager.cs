@@ -1,49 +1,111 @@
-using System.Security.Cryptography;
+using System;
 using UnityEngine;
 using UnityEngine.InputSystem;
-using UnityEngine.Rendering;
+using static UnityEditor.Experimental.GraphView.GraphView;
 
 public class GameManager : MonoBehaviour
-{    
-    [SerializeField] GameObject openTilePrefab;
-    [SerializeField] float xIncrement;
-    [SerializeField] float yIncrement;
-    [SerializeField] float xStart;
-    [SerializeField] float yStart;
+{
+    GameObject[,] positions = new GameObject[3, 3];
+    GameObject[] openTiles = new GameObject[9];
 
-    GameObject openTilesScript;
+    public GameObject openTilePrefab;
+    public GameObject piece;
+
+    public string currentPlayer = "xPlayer";
+
+    private bool gameOver;
     private void Start()
     {
-        openTilesScript = GameObject.FindGameObjectWithTag("OpenTile");
+        gameOver = false;
+        openTiles = new GameObject[]
+        {
+            SpawnOpenTilePrefab(0, 0), SpawnOpenTilePrefab(0, 1), SpawnOpenTilePrefab(0, 2),
+            SpawnOpenTilePrefab(1, 0), SpawnOpenTilePrefab(1, 1), SpawnOpenTilePrefab(1, 2),
+            SpawnOpenTilePrefab(2, 0), SpawnOpenTilePrefab(2, 1), SpawnOpenTilePrefab(2, 2),
+        };
 
-        //Spawn all the open tile prefabs in the grid
-
-        for (int i = 0; i < 3; i++)
-        { 
-            for (int j = 0; j < 3; j++)
-            {
-                //Increment the space between each prefab to fit into the grid
-                Instantiate(openTilePrefab, new Vector2(xIncrement * i - xStart, yIncrement * j - yStart), Quaternion.identity);
-            }
+        for (int i = 0; i < openTiles.Length; i++)
+        {
+            SetPosition(openTiles[i]);
         }
     }
+    private GameObject SpawnOpenTilePrefab(int x, int y)
+    {
+        GameObject obj = Instantiate(openTilePrefab, new Vector2(x, y), Quaternion.identity);
+        OpenTiles ot = obj.GetComponent<OpenTiles>();
 
+        ot.SetXBoard(x);
+        ot.SetYBoard(y);
+
+        return obj;
+    }
+    public void SetPosition(GameObject obj)
+    {
+        OpenTiles ot = obj.GetComponent<OpenTiles>();
+
+        positions[ot.GetXBoard(), ot.GetYBoard()] = obj;
+    }
     public void OnClick(InputValue value)
     {
         if (value.isPressed)
         {
-            //Check the position of the mouse
-            //if the mouse position is in a open tile box collider
-            //spawn a piece and destroy the open tile prefab
-
             Vector2 mousePosition = Camera.main.ScreenToWorldPoint(Mouse.current.position.ReadValue());
 
-            OpenTiles ot = openTilesScript.GetComponent<OpenTiles>();
+            RaycastHit2D hit = Physics2D.Raycast(mousePosition, Vector2.zero);
 
-            if (ot.GetBoxCollider().bounds.Contains(mousePosition))
+            if (hit.collider != null)
             {
-                ot.DestroyThisTile();
+                GameObject clickedObject = hit.collider.gameObject;
+
+                if (currentPlayer == "xPlayer")
+                {
+                    CreatePiece("xPiece", clickedObject.transform.position);
+                }
+                else if (currentPlayer != "xPlayer")
+                {
+                    CreatePiece("oPiece", clickedObject.transform.position);                    
+                }
+
+                Destroy(clickedObject);
+                NextTurn();
             }
         }
+    }
+    public GameObject CreatePiece(string name, Vector2 position)
+    {
+        GameObject obj = Instantiate(piece, position, Quaternion.identity);
+
+        Pieces p = obj.GetComponent<Pieces>();
+        p.name = name;
+        p.Activate();
+
+        return obj;
+    }
+    void NextTurn()
+    {
+        if (currentPlayer == "xPlayer")
+        {
+            currentPlayer = "oPlayer";
+        }
+        else
+        {
+            currentPlayer = "xPlayer";
+        }
+    }
+    void Winner()
+    {
+        if (positions[0, 2] && positions[1, 2] && positions[2, 2])
+        {
+            gameOver = true;
+            print("Game Over");
+        }
+        else
+        {
+            gameOver = false;
+        }
+    }
+    private void Update()
+    {
+        Winner();
     }
 }
